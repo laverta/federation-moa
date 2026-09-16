@@ -1,0 +1,23 @@
+{
+  "id": "EVAL-008-SKILLS-COMPLIANCE",
+  "desc": "联邦技能资料库入库验货自动化合规靶标 (9大游戏与UI技能三铁律验证)",
+  "cmd": "py ${FED_LOCAL_ROOT}\\skills\\verify_skills_compliance.py --selftest",
+  "cwd": "${FED_LOCAL_ROOT}\\skills",
+  "timeout_s": 30,
+  "snapshot": [
+    "${FED_LOCAL_ROOT}\\skills\\verify_skills_compliance.py"
+  ],
+  "assertions": [
+    {
+      "type": "exit0"
+    },
+    {
+      "type": "regex",
+      "value": "\\d+/\\d+ skills PASSED"
+    },
+    {
+      "type": "contains",
+      "value": "All skills strictly comply"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "EVAL-012-UI-INTERACTION-HEALTH",
+  "desc": "8800 生产级实时经营总台前端交互健康探针 (EVAL-012 全局错误/工坊抽屉/接口幂等)",
+  "cmd": "py ${FED_LOCAL_ROOT}\\verify_ui_interaction_health.py --selftest",
+  "cwd": "${FED_LOCAL_ROOT}",
+  "timeout_s": 25,
+  "snapshot": [
+    "${FED_LOCAL_ROOT}\\verify_ui_interaction_health.py"
+  ],
+  "assertions": [
+    {
+      "type": "exit0"
+    },
+    {
+      "type": "contains",
+      "value": "EVAL-012 ALL CLEAR"
+    },
+    {
+      "type": "contains",
+      "value": "100% PASS"
+    }
+  ]
+}

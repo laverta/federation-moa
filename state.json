@@ -1,0 +1,10 @@
+{
+ "agent": "dsh",
+ "pid": 26216,
+ "mtime": 1789568372.577527,
+ "lease_expires_at": 1789568972.577527,
+ "last_seq": 0,
+ "status": "IDLE",
+ "mode": "resident",
+ "ts": "2026-09-16 08:19:32"
+}

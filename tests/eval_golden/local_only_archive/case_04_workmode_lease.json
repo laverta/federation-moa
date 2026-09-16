@@ -1,0 +1,12 @@
+{
+  "id": "EVAL-004-WORKMODE-LEASE",
+  "desc": "WORKMODE.json 单写者动态租约判定与新鲜度验证",
+  "cmd": "py ${FED_LOCAL_ROOT}\\check_workmode_lease.py",
+  "cwd": "${FED_LOCAL_ROOT}",
+  "timeout_s": 15,
+  "snapshot": [],
+  "assertions": [
+    {"type": "exit0"},
+    {"type": "contains", "value": "PASS: WORKMODE_LEASE_VALID"}
+  ]
+}

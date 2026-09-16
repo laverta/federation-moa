@@ -1,0 +1,13 @@
+{
+  "id": "EVAL-003-COMPLIANCE-SUITE",
+  "desc": "反重力黑盒合规契约测试套件 (8/8 契约全自动化测试)",
+  "cmd": "py ${FED_LOCAL_ROOT}\\test_core_compliance.py",
+  "cwd": "${FED_LOCAL_ROOT}",
+  "timeout_s": 30,
+  "snapshot": ["${FED_LOCAL_ROOT}\\test_core_compliance.py"],
+  "assertions": [
+    {"type": "exit0"},
+    {"type": "contains", "value": "Ran 8 tests"},
+    {"type": "contains", "value": "OK"}
+  ]
+}

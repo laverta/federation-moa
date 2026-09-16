@@ -1,0 +1,13 @@
+{
+  "id": "EVAL-002-CORE-DOCTOR",
+  "desc": "联邦桥核心库运行环境体检 (只读探测与孤儿清理)",
+  "cmd": "py ${FED_LOCAL_ROOT}\\federation_bridge_core.py --doctor",
+  "cwd": "${FED_LOCAL_ROOT}",
+  "timeout_s": 20,
+  "snapshot": ["${FED_LOCAL_ROOT}\\federation_bridge_core.py"],
+  "assertions": [
+    {"type": "exit0"},
+    {"type": "contains", "value": "\"healthy\": true"},
+    {"type": "contains", "value": "\"status\": \"HEALTHY\""}
+  ]
+}

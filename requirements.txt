@@ -1,0 +1,4 @@
+# Federation-MOA: zero required dependencies (pure Python 3.10+ stdlib).
+# Optional cockpit extras / bench heavy deps:
+#   pandas matplotlib numpy scikit-learn scipy requests seaborn  # BigCodeBench judge env
+#   datasets huggingface_hub                                    # dataset download

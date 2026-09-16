@@ -1,0 +1,13 @@
+{
+  "id": "EVAL-009-DSH-CORE-HEALTH",
+  "desc": "DSH L0 看门狗健康探针：单 Tick 实跑 + 四元组租约状态落盘（RFC-001 v1.1.0 Phase 3 递进一级）",
+  "cmd": "py ${FED_ROOT}/dsh-core\\dsh_daemon.py --once --poll 1",
+  "cwd": "${FED_ROOT}/dsh-core",
+  "timeout_s": 30,
+  "snapshot": [],
+  "assertions": [
+    {"type": "exit0"},
+    {"type": "file_exists", "value": "${FED_ROOT}/dsh-core\\state.json"},
+    {"type": "file_exists", "value": "${FED_ROOT}/dsh-core\\STATE.md"}
+  ]
+}

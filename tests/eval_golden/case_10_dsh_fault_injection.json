@@ -1,0 +1,12 @@
+{
+  "id": "EVAL-010-DSH-FAULT-INJECTION",
+  "desc": "DSH 故障注入：PID 排他锁互斥拒绝（双实例裂脑防护）+ 单 Tick 消费 + 滚动日志（FM-08）",
+  "cmd": "py ${FED_ROOT}/dsh-core\\dsh_daemon.py --selftest",
+  "cwd": "${FED_ROOT}/dsh-core",
+  "timeout_s": 30,
+  "snapshot": [],
+  "assertions": [
+    {"type": "exit0"},
+    {"type": "contains", "value": "[SELFTEST] dsh_daemon PASS"}
+  ]
+}

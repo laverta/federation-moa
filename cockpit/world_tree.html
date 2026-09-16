@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌿 全邦三维世界树拓扑 (Federal World Tree 3D)</title>
+    <script src="/static/three.min.js"></script>
+    <script src="/static/OrbitControls.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #03060f;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #webgl-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Top Bar Overlay */
+        .hud-topbar {
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .hud-badge-title {
+            pointer-events: auto;
+            background: rgba(8, 14, 28, 0.85);
+            border: 1px solid #1e3a8a;
+            border-radius: 10px;
+            padding: 10px 18px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .hud-logo {
+            background: linear-gradient(135deg, #10b981, #6366f1);
+            color: #fff;
+            font-weight: 900;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+        }
+        .hud-title-text {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .hud-status-group {
+            pointer-events: auto;
+            display: flex;
+            gap: 8px;
+        }
+        .hud-status-pill {
+            background: rgba(8, 14, 28, 0.85);
+            border: 1px solid #1e293b;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot-green { background: #34d399; box-shadow: 0 0 8px #34d399; }
+        .dot-blue { background: #38bdf8; box-shadow: 0 0 8px #38bdf8; }
+        .dot-purple { background: #c084fc; box-shadow: 0 0 8px #c084fc; }
+        .dot-amber { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
+        .dot-gray { background: #64748b; }
+
+        /* Quick View Presets */
+        .hud-view-presets {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        .btn-preset {
+            background: rgba(12, 20, 38, 0.85);
+            border: 1px solid #1e3a8a;
+            color: #94a3b8;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+        .btn-preset:hover {
+            background: #1e3a8a;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .btn-preset.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #60a5fa;
+        }
+
+        /* Node Inspector Sidebar */
+        .node-inspector {
+            position: absolute;
+            top: 80px;
+            right: 24px;
+            width: 360px;
+            background: rgba(10, 16, 32, 0.92);
+            border: 1px solid #2563eb;
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 10;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+        .node-inspector.show { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .inspector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 10px;
+        }
+        .inspector-title { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .inspector-close { cursor: pointer; color: #94a3b8; font-size: 14px; }
+        .inspector-close:hover { color: #fff; }
+
+        .inspector-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-trunk { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+        .badge-branch { background: rgba(192, 132, 252, 0.2); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); }
+        .badge-zaxis { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); }
+
+        .inspector-desc { font-size: 13.5px; color: #cbd5e1; line-height: 1.6; }
+        .inspector-meta { background: #060914; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .inspector-meta-item { display: flex; justify-content: space-between; }
+        .inspector-meta-item span:first-child { color: #94a3b8; }
+        .inspector-meta-item span:last-child { color: #fff; font-family: monospace; font-weight: 600; }
+
+        .btn-inspect-action {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            border: none;
+            padding: 9px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn-inspect-action:hover {
+            box-shadow: 0 0 16px rgba(124, 58, 237, 0.5);
+        }
+
+        /* Bottom Hint */
+        .hud-hint {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            font-size: 12px;
+            color: #64748b;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="webgl-canvas"></div>
+
+    <!-- Top Overlay -->
+    <div class="hud-topbar">
+        <div class="hud-badge-title">
+            <span class="hud-logo">YGGDRASIL</span>
+            <span class="hud-title-text">全邦三维世界树拓扑 (Federal World Tree 3D)</span>
+        </div>
+
+        <div class="hud-status-group">
+            <div class="hud-status-pill"><div class="dot dot-blue"></div> 前向编排: Gemini 3.8F</div>
+            <div class="hud-status-pill"><div class="dot dot-purple"></div> T-1 不变性守门: DeepSeek 4.1F</div>
+            <div class="hud-status-pill"><div class="dot dot-amber"></div> 认知海关 (数据清洗): 贯穿监控</div>
+            <div class="hud-status-pill"><div class="dot dot-gray"></div> GLM 5.3F: 额度休眠 💤</div>
+            <div class="hud-status-pill"><div class="dot dot-green"></div> 8766 邮桥: 连通</div>
+        </div>
+    </div>
+
+    <!-- Quick Presets -->
+    <div class="hud-view-presets">
+        <button class="btn-preset active" onclick="setPreset('overview')">🪐 全景俯瞰</button>
+        <button class="btn-preset" onclick="setPreset('trunk')">🏛️ 主干圣堂 (DSH)</button>
+        <button class="btn-preset" onclick="setPreset('zaxis')">🔭 Z轴数据清洗光柱</button>
+        <button class="btn-preset" onclick="setPreset('musketeers')">⚔️ 三剑客 TTC 树枝</button>
+        <button class="btn-preset" onclick="setPreset('zcode')">🔨 ZCode 施工树枝</button>
+        <button class="btn-preset" onclick="setPreset('antigravity')">🌌 反重力探索树枝</button>
+    </div>
+
+    <div class="hud-hint">
+        💡 交互提示：按住左键旋转视角 · 滚轮缩放 · 右键平移 · 点击节点查看机密卷宗
+    </div>
+
+    <!-- Node Inspector Sidebar -->
+    <div class="node-inspector" id="node-inspector">
+        <div class="inspector-header">
+            <span class="inspector-title" id="insp-title">节点名称</span>
+            <span class="inspector-close" onclick="closeInspector()">✕</span>
+        </div>
+        <div>
+            <span class="inspector-badge" id="insp-badge">TRUNK</span>
+        </div>
+        <p class="inspector-desc" id="insp-desc">节点描述...</p>
+        <div class="inspector-meta" id="insp-meta">
+            <!-- Dynamic meta items -->
+        </div>
+        <button class="btn-inspect-action" id="insp-btn" onclick="executeNodeAction()">⚡ 调遣 / 聚焦本节点</button>
+    </div>
+
+    <script>
+        // -------------------------------------------------------------
+        // Three.js Scene Setup
+        // -------------------------------------------------------------
+        const container = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x03060f, 0.0018);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 3000);
+        camera.position.set(0, 80, 420);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 1200;
+        controls.minDistance = 50;
+        controls.target.set(0, 30, 0);
+
+        // Ambient and Directional Lights
+        const ambientLight = new THREE.AmbientLight(0x1e293b, 1.5);
+        scene.add(ambientLight);
+
+        const coreLight = new THREE.PointLight(0x38bdf8, 3, 400);
+        coreLight.position.set(0, 40, 0);
+        scene.add(coreLight);
+
+        const goldLight = new THREE.PointLight(0xfbbf24, 2.5, 500);
+        goldLight.position.set(0, 100, 0);
+        scene.add(goldLight);
+
+        // Starfield Particles
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 1800;
+        const starsPos = new Float32Array(starsCount * 3);
+        for (let i = 0; i < starsCount * 3; i += 3) {
+            starsPos[i] = (Math.random() - 0.5) * 2000;
+            starsPos[i+1] = (Math.random() - 0.5) * 1500;
+            starsPos[i+2] = (Math.random() - 0.5) * 2000;
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+        const starsMat = new THREE.PointsMaterial({ color: 0x64748b, size: 2.2, transparent: true, opacity: 0.6 });
+        const starField = new THREE.Points(starsGeo, starsMat);
+        scene.add(starField);
+
+        // -------------------------------------------------------------
+        // World Tree Node Definitions
+        // -------------------------------------------------------------
+        const NODES = [
+            {
+                id: "trunk_core",
+                name: "联邦 DSH 主干圣堂",
+                type: "trunk",
+                badge: "TRUNK · 树干中枢",
+                pos: [0, 40, 0],
+                color: 0x38bdf8,
+                size: 14,
+                desc: "联邦最高议政圣堂与态势中枢。支持意图前向编排（Gemini 3.8F），沉淀全邦历史案例库，承载指挥官最高意志。",
+                meta: [
+                    ["主控模型", "Gemini 3.8 Flash (1M)"],
+                    ["运行端口", ":8765 (HTTP) / :8766 (Mail)"],
+                    ["态势状态", "ACTIVE · 圣堂就绪"]
+                ]
+            },
+            {
+                id: "zaxis_cleaner",
+                name: "Z 轴数据清洗海关 (指挥官分身)",
+                type: "zaxis",
+                badge: "Z-AXIS · 贯穿负熵",
+                pos: [0, 120, 0],
+                color: 0xfbbf24,
+                size: 11,
+                desc: "贯穿整棵世界树的认知海关与司书官。全天候生肉去噪、T-1 范式打标、技能防爆仓验货，抓取越俎代庖病理，维持全树负熵。",
+                meta: [
+                    ["身份象征", "指挥官意志在系统中的数字分身"],
+                    ["执剑武器", "T-1 漂移测度 / 30项技能总闸"],
+                    ["运行状态", "PERPETUAL · 永远醒着"]
+                ]
+            },
+            {
+                id: "branch_musketeers",
+                name: "轻量三剑客 TTC 战备树枝",
+                type: "branch",
+                badge: "BRANCH · TTC 算力膨胀",
+                pos: [130, 80, 70],
+                color: 0xc084fc,
+                size: 12,
+                desc: "以轻量级协同战胜 GPT-5.6 Sol 的先锋树枝！投入 15K~50K Token 与 30s~60s 深度对抗校验，本地 AST 静态断言与自愈闭环。",
+                meta: [
+                    ["核心成员", "3.8F 秘书 + 4.1F 红队 + AST 自愈"],
+                    ["BCB-Hard 战绩", "57.5% (超单体 45.0%)"],
+                    ["最新结晶", "15,878 Tokens / 53.4s"]
+                ]
+            },
+            {
+                id: "branch_zcode",
+                name: "ZCode 铁血施工树枝",
+                type: "branch",
+                badge: "BRANCH · 生产基建",
+                pos: [-140, 50, 60],
+                color: 0x34d399,
+                size: 11,
+                desc: "扎根于本地物理磁盘的硬核施工队伍。OrangeCrane 坐镇，承接 Spec 派工，执行真实代码变动并输出 Git Diff。",
+                meta: [
+                    ["首席领袖", "OrangeCrane (施工队长)"],
+                    ["通信协议", "8766 邮件桥 storage.sqlite3"],
+                    ["工作区", "FED_ROOT (代码仓)"]
+                ]
+            },
+            {
+                id: "branch_antigravity",
+                name: "反重力全景探索树枝",
+                type: "branch",
+                badge: "BRANCH · 宏观探路",
+                pos: [-100, 110, -100],
+                color: 0x60a5fa,
+                size: 10,
+                desc: "具备 1M 全景长程上下文的宏观侦察与文献天文台。负责全网最佳实践检索、大仓库代码通读与前沿技术调研。",
+                meta: [
+                    ["探路首席", "WindyElk / SilentBear (1M)"],
+                    ["认知跨度", "1,000,000 Tokens 全景"],
+                    ["状态", "READY · 广角就绪"]
+                ]
+            },
+            {
+                id: "branch_ui",
+                name: "UI 视觉与人机工效树枝",
+                type: "branch",
+                badge: "BRANCH · 体验门面",
+                pos: [110, 30, -90],
+                color: 0xf43f5e,
+                size: 10,
+                desc: "联邦的视觉感知层与交互体验画廊。专注 4K 大屏工效、双轨物理滚轴、16px 大字号排版与直观 3D 拓扑表现。",
+                meta: [
+                    ["设计席位", "BoldHill (视觉首席)"],
+                    ["设计铁律", "坚决拒绝高饱和色块敷衍"],
+                    ["当前成果", "v2.0.0 思考座舱 + 3D世界树"]
+                ]
+            },
+            {
+                id: "branch_sandbox",
+                name: "本地沙箱与体检树枝",
+                type: "branch",
+                badge: "BRANCH · 确定性保障",
+                pos: [0, -50, 0],
+                color: 0x10b981,
+                size: 9,
+                desc: "扎根于地底的确定性地基。执行单写并发测试、`--doctor` 体检、孤儿 tmp 清扫与崩溃自愈断言。",
+                meta: [
+                    ["安全防线", "原子写 / os.replace / fsync"],
+                    ["体检入口", "dsh_runtime.py --doctor"],
+                    ["状态", "SECURE · 零毒丸保护"]
+                ]
+            }
+        ];
+
+        // -------------------------------------------------------------
+        // Geometry Construction: Trunk, Z-Beam, Branches
+        // -------------------------------------------------------------
+        const clickableObjects = [];
+
+        // 1. Z-Axis Golden Beam (Z 轴正交贯穿光柱)
+        const zBeamGeo = new THREE.CylinderGeometry(4, 4, 380, 32);
+        const zBeamMat = new THREE.MeshBasicMaterial({
+            color: 0xfbbf24,
+            transparent: true,
+            opacity: 0.35,
+            wireframe: false
+        });
+        const zBeam = new THREE.Mesh(zBeamGeo, zBeamMat);
+        zBeam.position.set(0, 50, 0);
+        scene.add(zBeam);
+
+        // Outer glow cylinder for Z-beam
+        const zGlowGeo = new THREE.CylinderGeometry(9, 9, 380, 16);
+        const zGlowMat = new THREE.MeshBasicMaterial({
+            color: 0xf59e0b,
+            transparent: true,
+            opacity: 0.08,
+            side: THREE.BackSide
+        });
+        const zGlow = new THREE.Mesh(zGlowGeo, zGlowMat);
+        zGlow.position.set(0, 50, 0);
+        scene.add(zGlow);
+
+        // 2. Trunk Core (主干多段扭曲发光体)
+        const trunkPoints = [];
+        for (let i = 0; i <= 20; i++) {
+            const y = -60 + i * 8;
+            const r = Math.sin(i * 0.3) * 3;
+            trunkPoints.push(new THREE.Vector3(r, y, r * 0.5));
+        }
+        const trunkCurve = new THREE.CatmullRomCurve3(trunkPoints);
+        const trunkGeo = new THREE.TubeGeometry(trunkCurve, 40, 7, 16, false);
+        const trunkMat = new THREE.MeshStandardMaterial({
+            color: 0x0f2b5c,
+            emissive: 0x1e3a8a,
+            emissiveIntensity: 0.6,
+            roughness: 0.3,
+            metalness: 0.8,
+            wireframe: true
+        });
+        const trunkMesh = new THREE.Mesh(trunkGeo, trunkMat);
+        scene.add(trunkMesh);
+
+        // 3. Branches linking Trunk to Nodes
+        const branchSplines = [];
+        NODES.forEach(n => {
+            if (n.id === "trunk_core" || n.id === "branch_sandbox") return;
+            
+            const startPt = new THREE.Vector3(0, 40, 0);
+            const midPt = new THREE.Vector3(n.pos[0] * 0.45, 40 + (n.pos[1] - 40) * 0.3, n.pos[2] * 0.45);
+            const endPt = new THREE.Vector3(n.pos[0], n.pos[1], n.pos[2]);
+            
+            const curve = new THREE.CatmullRomCurve3([startPt, midPt, endPt]);
+            branchSplines.push({ curve: curve, color: n.color });
+
+            const tubeGeo = new THREE.TubeGeometry(curve, 24, 2, 8, false);
+            const tubeMat = new THREE.MeshStandardMaterial({
+                color: n.color,
+                emissive: n.color,
+                emissiveIntensity: 0.4,
+                transparent: true,
+                opacity: 0.7,
+                wireframe: true
+            });
+            const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+            scene.add(tubeMesh);
+        });
+
+        // 4. Create Interactive Node Orbs and Floating Text Sprites
+        function makeTextSprite(message, colorStr) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 380;
+            canvas.height = 70;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(6, 11, 25, 0.75)';
+            ctx.strokeStyle = colorStr;
+            ctx.lineWidth = 3;
+            ctx.roundRect(10, 10, 360, 50, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.font = 'bold 24px -apple-system, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText(message, 190, 44);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.scale.set(38, 7, 1);
+            return sprite;
+        }
+
+        NODES.forEach(nodeData => {
+            // Orb
+            const orbGeo = new THREE.SphereGeometry(nodeData.size, 32, 32);
+            const orbMat = new THREE.MeshStandardMaterial({
+                color: nodeData.color,
+                emissive: nodeData.color,
+                emissiveIntensity: 0.7,
+                roughness: 0.2,
+                metalness: 0.6
+            });
+            const orb = new THREE.Mesh(orbGeo, orbMat);
+            orb.position.set(nodeData.pos[0], nodeData.pos[1], nodeData.pos[2]);
+            orb.userData = nodeData;
+            scene.add(orb);
+            clickableObjects.push(orb);
+
+            // Halo Ring
+            const ringGeo = new THREE.RingGeometry(nodeData.size * 1.3, nodeData.size * 1.5, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: nodeData.color, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.copy(orb.position);
+            ring.rotation.x = Math.PI / 2;
+            scene.add(ring);
+            orb.userData.ring = ring;
+
+            // Floating label
+            const labelColorHex = '#' + nodeData.color.toString(16).padStart(6, '0');
+            const sprite = makeTextSprite(nodeData.name, labelColorHex);
+            sprite.position.set(nodeData.pos[0], nodeData.pos[1] + nodeData.size + 8, nodeData.pos[2]);
+            scene.add(sprite);
+        });
+
+        // 5. Flowing Energy Packets (沿树枝流动的光粒子)
+        const packetCount = 40;
+        const packetGeo = new THREE.SphereGeometry(1.8, 8, 8);
+        const packetMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const packets = [];
+
+        for (let i = 0; i < packetCount; i++) {
+            const mesh = new THREE.Mesh(packetGeo, packetMat);
+            const splineObj = branchSplines[i % branchSplines.length];
+            scene.add(mesh);
+            packets.push({
+                mesh: mesh,
+                spline: splineObj.curve,
+                t: Math.random(),
+                speed: 0.003 + Math.random() * 0.005
+            });
+        }
+
+        // -------------------------------------------------------------
+        // Interaction: Raycaster & Click Events
+        // -------------------------------------------------------------
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('click', onDocumentClick, false);
+
+        function onDocumentClick(event) {
+            // Ignore if clicking on UI overlays
+            if (event.target.closest('.hud-topbar') || 
+                event.target.closest('.hud-view-presets') || 
+                event.target.closest('.node-inspector')) {
+                return;
+            }
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(clickableObjects);
+
+            if (intersects.length > 0) {
+                const nodeData = intersects[0].object.userData;
+                selectNode(nodeData);
+            }
+        }
+
+        let activeTargetPos = null;
+
+        function selectNode(nodeData) {
+            document.getElementById('insp-title').innerText = nodeData.name;
+            const badgeEl = document.getElementById('insp-badge');
+            badgeEl.innerText = nodeData.badge;
+            badgeEl.className = 'inspector-badge badge-' + (nodeData.type === 'zaxis' ? 'zaxis' : nodeData.type === 'trunk' ? 'trunk' : 'branch');
+
+            document.getElementById('insp-desc').innerText = nodeData.desc;
+
+            const metaContainer = document.getElementById('insp-meta');
+            metaContainer.innerHTML = (nodeData.meta || []).map(m => `
+                <div class="inspector-meta-item">
+                    <span>${m[0]}:</span>
+                    <span>${m[1]}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('insp-btn').innerText = `⚡ 聚焦与调遣【${nodeData.name.split(' ')[0]}】`;
+            document.getElementById('node-inspector').classList.add('show');
+
+            // Smooth camera transition towards node
+            activeTargetPos = new THREE.Vector3(nodeData.pos[0], nodeData.pos[1], nodeData.pos[2]);
+        }
+
+        function closeInspector() {
+            document.getElementById('node-inspector').classList.remove('show');
+        }
+
+        function executeNodeAction() {
+            const title = document.getElementById('insp-title').innerText;
+            alert(`🚀 已向联邦 DSH 提交调度指令：\\n\\n【目标树枝】：${title}\\n状态：信号通畅，前向编排与 T-1 鉴别双向握手就绪！`);
+        }
+
+        // Camera Presets
+        function setPreset(presetName) {
+            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (presetName === 'overview') {
+                targetCamPos = new THREE.Vector3(0, 90, 440);
+                controls.target.set(0, 30, 0);
+            } else if (presetName === 'trunk') {
+                targetCamPos = new THREE.Vector3(0, 50, 160);
+                controls.target.set(0, 40, 0);
+            } else if (presetName === 'zaxis') {
+                targetCamPos = new THREE.Vector3(40, 150, 180);
+                controls.target.set(0, 120, 0);
+            } else if (presetName === 'musketeers') {
+                targetCamPos = new THREE.Vector3(200, 110, 160);
+                controls.target.set(130, 80, 70);
+            } else if (presetName === 'zcode') {
+                targetCamPos = new THREE.Vector3(-220, 80, 150);
+                controls.target.set(-140, 50, 60);
+            } else if (presetName === 'antigravity') {
+                targetCamPos = new THREE.Vector3(-160, 140, -10);
+                controls.target.set(-100, 110, -100);
+            }
+        }
+
+        let targetCamPos = null;
+
+        // -------------------------------------------------------------
+        // Render Loop
+        // -------------------------------------------------------------
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+
+            // Rotate starfield slowly
+            starField.rotation.y = time * 0.015;
+
+            // Pulse Z-Beam
+            zBeam.material.opacity = 0.30 + Math.sin(time * 3.0) * 0.12;
+            zGlow.material.opacity = 0.06 + Math.sin(time * 2.5) * 0.04;
+
+            // Rotate Node Halos
+            clickableObjects.forEach(orb => {
+                if (orb.userData.ring) {
+                    orb.userData.ring.rotation.z = time * 0.8;
+                }
+            });
+
+            // Flow packets along branches
+            packets.forEach(p => {
+                p.t = (p.t + p.speed) % 1.0;
+                const pt = p.spline.getPointAt(p.t);
+                p.mesh.position.copy(pt);
+            });
+
+            // Smooth camera lerp
+            if (targetCamPos) {
+                camera.position.lerp(targetCamPos, 0.05);
+                if (camera.position.distanceTo(targetCamPos) < 2) {
+                    targetCamPos = null;
+                }
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Dynamic Heartbeat Polling (OrangeCrane's suggestion: 原型即实装)
+        async function pollRealHeartbeats() {
+            try {
+                const resp = await fetch('/api/heartbeats');
+                const data = await resp.json();
+
+                const oc = data['OrangeCrane'];
+                const zcodeNode = NODES.find(n => n.id === 'branch_zcode');
+                if (zcodeNode && oc) {
+                    const isAlive = oc.status === 'ALIVE' || oc.status === 'WORKING';
+                    zcodeNode.meta[1] = ["真实心跳", isAlive ? `🟢 ${oc.status}` : "🔴 DEAD (失联)"];
+                    zcodeNode.meta[2] = ["最近打卡", oc.ts ? oc.ts.split(' ')[1] : "N/A"];
+                }
+
+                const sb = data['SilentBear'];
+                const trunkNode = NODES.find(n => n.id === 'trunk_core');
+                if (trunkNode && sb) {
+                    trunkNode.meta[2] = ["秘书席心跳", `🟢 ${sb.status} (${sb.ts ? sb.ts.split(' ')[1] : ''})`];
+                }
+            } catch (e) {
+                console.warn("Heartbeat poll failed", e);
+            }
+        }
+        setInterval(pollRealHeartbeats, 5000);
+        pollRealHeartbeats();
+
+        animate();
+    </script>
+</body>
+</html>

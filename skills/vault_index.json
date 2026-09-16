@@ -1,0 +1,53 @@
+{
+ "generated": "open-source",
+ "domains": [
+  {
+   "domain": "skills",
+   "root": "skills",
+   "items": [
+    {
+     "name": "concise-mode",
+     "version": "1.0.0",
+     "rating": "★★★",
+     "desc": "中文环境高密度精简表达协议。通过表达层（剔除冗余修饰）与内容层（核心结论+要点列表）双层压缩，根治大语言模型在中文 CJK 语境下的 Token 快速膨胀问题。",
+     "path": "skills/concise-mode"
+    },
+    {
+     "name": "data-cleansing",
+     "version": "?",
+     "rating": "",
+     "desc": "Z 轴数据清洗与负熵海关规范（正在向独立技能孵化）。负责多智能体协同流水线前置生肉过滤、格式归一、30 项高星本地技能库分级装配与防爆仓约束。只作为规划中规范公",
+     "path": "skills/data-cleansing"
+    },
+    {
+     "name": "federation-protocol",
+     "version": "1.0.0",
+     "rating": "★★★",
+     "desc": "联邦协作纪律（v1.2.x 协议族 + 七列表 + 会话纪律）。任何新 agent/会话加入联邦或多 agent 协作时使用：上岗流程、发信格式、线程纪律、退出",
+     "path": "skills/federation-protocol"
+    },
+    {
+     "name": "moa",
+     "version": "2.0.0",
+     "rating": "★★★",
+     "desc": "多智能体协作工作流（Mixture of Agents）。联邦的\"正儿八经解决工作\"操作系统：对话式工作流（指挥官↔秘书↔席位）、岗位-模型选角（含实测评测）、",
+     "path": "skills/moa"
+    },
+    {
+     "name": "t-1",
+     "version": "?",
+     "rating": "",
+     "desc": "第三人称观测组件（Third-One）——中立元认知观察器。以第三人称立场观测与标注思维范式及系统状态，三个角色：数据清洗（给子 Agent 输出打范式偏差标签",
+     "path": "skills/t-1"
+    },
+    {
+     "name": "token-efficient",
+     "version": "1.0.0",
+     "rating": "★★★",
+     "desc": "治理 Agent 自动化长程循环中的 Token 浪费与输出拖沓。包含禁止套话、禁止重复读盘、强制局部 Diff 替换、严禁全文件覆写等 9 大黄金守则。适用场",
+     "path": "skills/token-efficient"
+    }
+   ]
+  }
+ ]
+}

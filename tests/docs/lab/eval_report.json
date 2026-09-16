@@ -1,0 +1,35 @@
+{
+ "total": 4,
+ "passed": 3,
+ "ts": 1789568373.1770515,
+ "results": [
+  {
+   "id": "EVAL-007-RUNNER-SELFTEST",
+   "ok": true,
+   "detail": "exit=0; contains '[SELFTEST] PASS'",
+   "rolled_back_files": 0,
+   "at": "08:19:32"
+  },
+  {
+   "id": "EVAL-009-DSH-CORE-HEALTH",
+   "ok": false,
+   "detail": "exit=0; file_exists D:\\federation-open-source/dsh-core\\state.json; file_exists D:\\federation-open-source/dsh-core\\STATE.md",
+   "rolled_back_files": 0,
+   "at": "08:19:32"
+  },
+  {
+   "id": "EVAL-010-DSH-FAULT-INJECTION",
+   "ok": true,
+   "detail": "exit=0; contains '[SELFTEST] dsh_daemon PASS'",
+   "rolled_back_files": 0,
+   "at": "08:19:33"
+  },
+  {
+   "id": "EVAL-011-DSH-PROTOCOL-COMPLIANCE",
+   "ok": true,
+   "detail": "exit=0; contains '[SELFTEST] dsh_adapter_bridge PASS'",
+   "rolled_back_files": 0,
+   "at": "08:19:33"
+  }
+ ]
+}

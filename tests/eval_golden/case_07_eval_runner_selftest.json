@@ -1,0 +1,19 @@
+{
+  "id": "EVAL-007-RUNNER-SELFTEST",
+  "desc": "P2 评测运行器自身回滚机制与自测链复核",
+  "cmd": "py ${FED_ROOT}/tests/fed_eval_runner.py --selftest",
+  "cwd": "${FED_ROOT}/tests",
+  "timeout_s": 25,
+  "assertions": [
+    {
+      "type": "exit0"
+    },
+    {
+      "type": "contains",
+      "value": "[SELFTEST] PASS"
+    }
+  ],
+  "snapshot": [
+    "${FED_ROOT}/tests/fed_eval_runner.py"
+  ]
+}

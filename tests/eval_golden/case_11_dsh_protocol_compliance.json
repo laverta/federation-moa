@@ -1,0 +1,12 @@
+{
+  "id": "EVAL-011-DSH-PROTOCOL-COMPLIANCE",
+  "desc": "DSH 统一信封规范验证：canonical 键排序 + SHA-256 校验和 + 篡改拒绝 + 复合去重键（ARCH v1.1 对齐）",
+  "cmd": "py ${FED_ROOT}/dsh-core\\dsh_adapter_bridge.py --selftest",
+  "cwd": "${FED_ROOT}/dsh-core",
+  "timeout_s": 30,
+  "snapshot": [],
+  "assertions": [
+    {"type": "exit0"},
+    {"type": "contains", "value": "[SELFTEST] dsh_adapter_bridge PASS"}
+  ]
+}

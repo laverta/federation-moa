@@ -1,0 +1,13 @@
+{
+  "id": "EVAL-005-CONSOLE-API-HEALTH",
+  "desc": "8800 生产级实时经营总台 REST API 存活与数据探针",
+  "cmd": "curl.exe -s http://127.0.0.1:8800/api/live_state",
+  "cwd": "${FED_LOCAL_ROOT}",
+  "timeout_s": 15,
+  "assertions": [
+    {"type": "exit0"},
+    {"type": "contains", "value": "\"total_messages\""},
+    {"type": "contains", "value": "\"WindyElk\""},
+    {"type": "contains", "value": "\"OrangeCrane\""}
+  ]
+}
