@@ -6,3 +6,9 @@ __pycache__/
 *.key
 .hf_cache/
 .venv*/
+state.json
+*.pid
+daemon.log*
+INBOX.ndjson
+OUTBOX.ndjson
+cursor.json
