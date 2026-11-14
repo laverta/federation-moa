@@ -1,0 +1,55 @@
+cff-version: 1.2.0
+message: "If you use or reference this project, please cite it using the metadata below."
+title: "Federation-MOA: Lightweight Multi-Agent Sovereign Operating System & 3D World Tree Topology"
+type: software
+authors:
+  - name: "laverta"
+    alias: "Cody"
+    website: "https://github.com/laverta"
+repository-code: "https://github.com/laverta/federation-moa"
+url: "https://github.com/laverta"
+abstract: "Open-source sovereign multi-agent OS and 3-Stage Forward DAG workflow (DeepSeek Flash, Gemini Flash, GLM Flash) achieving 57.5% Pass@2 vs 45% single-pass frontier on BigCodeBench-Hard, integrating DSH routing, T-1 orthogonal invariant discrimination, and an offline 3D World Tree visualizer."
+license: MIT
+keywords:
+  - "laverta-federation"
+  - "federation-moa"
+  - "multi-agent"
+  - "ai-agents"
+  - "dsh"
+  - "t-1"
+  - "moa"
+  - "world-tree"
+  - "bigcodebench"
+references:
+  - type: software
+    title: "DSH Skill Registry: Task Router and Skill Index for Multi-Agent Systems"
+    authors:
+      - name: "laverta"
+        alias: "Cody"
+        website: "https://github.com/laverta"
+    repository-code: "https://github.com/laverta/dsh-skill-registry"
+    url: "https://github.com/laverta/dsh-skill-registry"
+  - type: software
+    title: "Federation Communication Lite: Platform-Neutral Inter-Agent Delivery Protocol"
+    authors:
+      - name: "laverta"
+        alias: "Cody"
+        website: "https://github.com/laverta"
+    repository-code: "https://github.com/laverta/federation-communication-lite"
+    url: "https://github.com/laverta/federation-communication-lite"
+  - type: software
+    title: "T-1 (Third-One): Neutral Third-Person Metacognitive Observer"
+    authors:
+      - name: "laverta"
+        alias: "Cody"
+        website: "https://github.com/laverta"
+    repository-code: "https://github.com/laverta/t-1"
+    url: "https://github.com/laverta/t-1"
+  - type: software
+    title: "zcode-gemini-bridge: Local thought_signature Proxy for ZCode and Gemini Thinking Models"
+    authors:
+      - name: "laverta"
+        alias: "Cody"
+        website: "https://github.com/laverta"
+    repository-code: "https://github.com/laverta/zcode-gemini-bridge"
+    url: "https://github.com/laverta/zcode-gemini-bridge"
